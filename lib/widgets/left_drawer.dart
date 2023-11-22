@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:techspace/screens/list_item.dart';
 import 'package:techspace/screens/menu.dart';
 import 'package:techspace/screens/shoplist_form.dart';
 
@@ -29,9 +30,9 @@ class LeftDrawer extends StatelessWidget {
                 Text(
                   "Cari semua keperluan barang elektronikmu hanya di TechSpace!",
                   style: TextStyle(
-                    fontSize: 15, 
-                    color: Colors.white, 
-                    fontWeight: FontWeight.normal, 
+                    fontSize: 15,
+                    color: Colors.white,
+                    fontWeight: FontWeight.normal,
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -60,6 +61,17 @@ class LeftDrawer extends StatelessWidget {
                   MaterialPageRoute(
                     builder: (context) => const ShopFormPage(),
                   ));
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.shopping_basket),
+            title: const Text('Daftar Item'),
+            onTap: () {
+              // Route menu ke halaman list item.
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const ItemPage()),
+              );
             },
           ),
         ],

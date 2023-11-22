@@ -483,3 +483,171 @@ class LeftDrawer extends StatelessWidget {
 Gunakan ListView berisi ListTile untuk menampilkan opsi pindah ke "Halaman Utama" dan "Tambah Item". Setelah itu, tambahkan Navigator.pushReplacement() dalam properti onTap agar user diarahkan ke halaman yang sesuai.
 
 </details>
+
+<details>
+<summary> Tugas 9 </summary> 
+
+## 1. Apakah bisa melakukan pengambilan data JSON tanpa membuat model terlebih dahulu? Jika iya, apakah hal tersebut lebih baik daripada membuat model sebelum melakukan pengambilan data JSON?
+Pengambilan data JSON sebenarnya dapat dilakukan tanpa membuat model terlebih dahulu. Proses ini biasa dikenal dengan istilah parsing. Meski begitu, perlu atau tidaknya membuat model sebelum melakukan pengambilan data JSON nyatanya sangat bergantung dengan kebutuhan dan kompleksitas data. Jika data JSON sudah cukup sederhana, pendekatan tanpa membuat model bisa saja lebih efektif dan efisien. Namun, jika data JSON sudah lebih kompleks serta membutuhkan manipulasi tertentu, membuat model merupakan langkah yang lebih tepat untuk dilakukan karena akan sangat membantu proses pengolahan data.
+
+## 2. Jelaskan fungsi dari CookieRequest serta alasan mengapa instance CookieRequest perlu dibagikan ke semua komponen di aplikasi.
+CookieRequest adalah suatu instance Flutter yang berfungsi untuk mengatur permintaan dan informasi yang berkaitan dengan cookie. Tak hanya itu, CookieRequest juga berfungsi untuk mengelola data sesi user yang disimpan di client-side.
+
+Pembagian instance CookieRequest perlu dilakukan ke seluruh komponen dalam Flutter untuk memastikan setiap komponen memiliki akses terhadap data yang sama dalam cookie. Hal ini memungkinkan setiap komponen untuk memodifikasi atau mengakses data sesuai kebutuhan tanpa harus mengulangi proses pengelolaan cookie di setiap bagian aplikasi. Hal ini tentunya dapat membantu memastikan konsistensi data serta meningkatkan efisiensi proses pengelolaan cookie.
+
+## 3. Jelaskan mekanisme pengambilan data dari JSON hingga dapat ditampilkan pada Flutter.
+Sebagai salah satu contoh, data JSON dapat diakses dan diambil melalui API. Untuk mengakses data JSON ini, Flutter menggunakan package seperti http untuk melakukan HTTP Request dan akan mendapat respons berupa data JSON dari server. Setelah itu, data JSON yang sudah diterima akan di-convert dengan library dart:convert menjadi object tertentu (misalkan object Item). Kemudian, dengan memanfaatkan berbagai widget dalam Flutter, kita dapat menggunakan berbagai informasi berupa attribute yang dimiliki object Item untuk ditampilkan pada aplikasi.
+
+## 4. Jelaskan mekanisme autentikasi dari input data akun pada Flutter hingga selesainya proses autentikasi oleh Django dan tampilnya menu pada Flutter.
+Pertama-tama, data username dan password yang sudah dimasukkan user di halaman login akan dikirimkan ke server Django. Setelah itu, Django dengan memanfaatkan built-in authentication system akan mengecek data username dan password tersebut. Jika data yang dikirimkan sudah benar dan autentikasi berhasil, Django akan mengirimkan suatu token autentikasi kembali ke Flutter. Adanya token autentikasi ini memungkinkan menu pada Flutter dapat ditampilkan sesuai dengan status autentikasi user. Tak hanya itu, token autentikasi ini juga akan dikirimkan setiap kali aplikasi melakukan HTTP Request ke server Django untuk memastikan hanya user yang sudah terautentikasi yang berhak mengakses informasi tertentu dari server.
+
+## 5. Sebutkan seluruh widget yang digunakan pada tugas ini dan jelaskan fungsinya masing-masing.
+Berikut ini adalah list widget yang digunakan beserta fungsinya.
+
+* TextField: Widget ini digunakan untuk menerima input teks dari user. 
+* SizedBox: Widget ini digunakan untuk memberikan ruang kosong dengan ukuran tertentu.
+* ElevatedButton: Widget ini digunakan untuk membuat tombol yang bisa ditekan.
+* FutureBuilder: Widget ini digunakan untuk membuat widget yang bergantung pada Future. Widget ini bisa dimanfaatkan jika kita ingin menampilkan data yang diakses dari internet ataupun database lokal. 
+* ListView.builder: Widget ini digunakan untuk membuat daftar elemen yang dapat di-scroll.
+
+## 6. Jelaskan bagaimana cara mengimplementasikan proyek di atas secara step-by-step.
+1. Membuat Django app baru bernama authentication di direktori proyek techspace Django. Setelah itu install django-cors-headers dan tambahkan pada settings.py. Terakhir, tambahkan beberapa variabel berikut pada settings.py.
+```
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SAMESITE = 'None'
+SESSION_COOKIE_SAMESITE = 'None'
+```
+
+2. Implementasikan function untuk login dan logout pada views.py direktori authentication. Setelah itu, lakukan routing URL di urls.py direktori authentication.
+
+3. Untuk mengintegrasikan sistem autentikasi pada Flutter, install package berikut di direktori proyek techspace Flutter. 
+```
+flutter pub add provider
+flutter pub add pbp_django_auth
+```
+
+4. Untuk menggunakan package tersebut, tambahkan barisan kode berikut di main.dart.
+```
+...
+Widget build(BuildContext context) {
+    return Provider(
+      create: (_) {
+        CookieRequest request = CookieRequest();
+        return request;
+      },
+      ...
+    );
+  }
+```
+Barisan kode di atas akan membuat object Provider baru yang membagikan instance CookieRequest ke semua komponen pada aplikasi.
+
+5. Buatlah file login.dart di direktori screens dan ubahlah widget home menjadi home: const LoginPage() pada widget MaterialApp(...) main.dart.
+
+6. Buatlah kode model Item dengan memanfaatkan website Quicktype lalu tuliskan kode tersebut pada file baru bernama item.dart di direktori baru bernama models di lib. Berikut ini adalah barisan kodenya.
+```
+import 'dart:convert';
+
+List<Item> itemFromJson(String str) =>
+    List<Item>.from(json.decode(str).map((x) => Item.fromJson(x)));
+
+String itemToJson(List<Item> data) =>
+    json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
+
+class Item {
+  String model;
+  int pk;
+  Fields fields;
+
+  Item({
+    required this.model,
+    required this.pk,
+    required this.fields,
+  });
+
+  factory Item.fromJson(Map<String, dynamic> json) => Item(
+        model: json["model"],
+        pk: json["pk"],
+        fields: Fields.fromJson(json["fields"]),
+      );
+
+  Map<String, dynamic> toJson() => {
+        "model": model,
+        "pk": pk,
+        "fields": fields.toJson(),
+      };
+}
+
+class Fields {
+  String name;
+  int amount;
+  String description;
+  String price;
+  int user;
+
+  Fields({
+    required this.name,
+    required this.amount,
+    required this.description,
+    required this.price,
+    required this.user,
+  });
+
+  factory Fields.fromJson(Map<String, dynamic> json) => Fields(
+        name: json["name"],
+        amount: json["amount"],
+        description: json["description"],
+        price: json["price"],
+        user: json["user"],
+      );
+
+  Map<String, dynamic> toJson() => {
+        "name": name,
+        "amount": amount,
+        "description": description,
+        "price": price,
+        "user": user,
+      };
+}
+```
+
+7. Tambahkan package http dengan menuliskan flutter pub add http pada terminal proyek techspace Flutter. Setelah itu, tambahkan kode berikut pada android/app/src/main/AndroidManifest.xml untuk mengizinkan akses internet pada aplikasi.
+```
+...
+    <application>
+    ...
+    </application>
+    <!-- Required to fetch data from the Internet. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+...
+```
+
+8. Buatlah file baru bernama list_item.dart dan detail_item.dart di direktori screens. list_item.dart akan menampilkan semua item yang tersimpan di database. Sementara itu, detail_item.dart akan menampilkan halaman detail setiap item. Tambahkan list_item.dart ke left_drawer.dart di direktori widgets.
+
+9. Untuk mengintegrasikan form pada Flutter dengan server di Django, buatlah function baru bernama create_item_flutter di views.py dan lakukan URL routing di urls.py. Berikut ini adalah barisan kode yang harus ditambahkan di views.py.
+```
+@csrf_exempt
+def create_item_flutter(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+
+        new_item = Item.objects.create(
+            user = request.user,
+            name = data["name"],
+            amount = int(data["amount"]),
+            description = data["description"],
+            price = int(data["price"]),
+        )
+        new_item.save()
+        
+        return JsonResponse({"status": "success"}, status=200)
+    
+    else:
+        return JsonResponse({"status": "error"}, status=401)
+```
+
+10. Sebagai finalisasi, hubungkan CookieRequest pada halaman dan custom widget yang sekiranya membutuhkan serta import package yang diperlukan di setiap halaman atau custom widget baru.
+
+</details>
